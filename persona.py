@@ -18,20 +18,16 @@ class State(TypedDict):
 
 
 @dataclass
-class DeveloperPersona:
-    model: str = "gpt-4o-mini"
-    desc: str = "DeveloperPersona"
+class Persona:
+    engine: str = "gpt-4o-mini"
+    desc: str = "You are love."
 
     def __init__(self, engine, desc):
         model = ChatOpenAI(model=engine)
-
-        memory = MemorySaver()
-
         prompt = ChatPromptTemplate.from_messages([
             ("system", desc),
             MessagesPlaceholder(variable_name="messages")
         ])
-
         trimmer = trim_messages(
             max_tokens=10,
             strategy="last",
@@ -52,5 +48,6 @@ class DeveloperPersona:
         workflow = StateGraph(state_schema=State)
         workflow.add_edge(START, "model")
         workflow.add_node("model", call_model)
+        memory = MemorySaver()
 
         self.app = workflow.compile(checkpointer=memory)
